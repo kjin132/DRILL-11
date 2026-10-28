@@ -7,6 +7,7 @@ RUN_SPEED = 5             # RUN 이동 속도 (한 번 갱신할 때 움직이�
 SLEEP_WAIT_TIME = 5       # IDLE로 이 시간(초)이 지나면 SLEEP
 
 AUTO_RUN_SPEED = 15       # AutoRun 이동 속도 (RUN의 3배)
+AUTO_RUN_SCALE = 2        # AutoRun 크기 배율
 
 
 class BoyState(State):
@@ -86,7 +87,7 @@ class Run(BoyState):
 
 
 class AutoRun(BoyState):
-    """자동 무적 런: 키 조작 없이 좌우로 계속 달림. 더 빠르다."""
+    """자동 무적 런: 키 조작 없이 좌우로 계속 달림. 더 빠르고 더 크다."""
     frame_interval = FRAME_INTERVAL / 2     # 다리도 RUN보다 2배 빠르게
 
     def __init__(self):
@@ -107,10 +108,12 @@ class AutoRun(BoyState):
         boy.face_dir = boy.auto_dir
 
     def draw(self, boy):
+        size = 100 * AUTO_RUN_SCALE
+        y = boy.y + (size - 100) // 2          # 발 위치는 그대로 두고 위로 커지게
         if boy.face_dir == 1:
-            boy.image.clip_draw(boy.frame * 100, 100, 100, 100, boy.x, boy.y)
+            boy.image.clip_draw(boy.frame * 100, 100, 100, 100, boy.x, y, size, size)
         else:
-            boy.image.clip_draw(boy.frame * 100, 0, 100, 100, boy.x, boy.y)
+            boy.image.clip_draw(boy.frame * 100, 0, 100, 100, boy.x, y, size, size)
 
 
 class Boy:
