@@ -93,10 +93,10 @@ class Boy:
         self.idle_start_time = get_time()   # IDLE에 들어간 시각 (5초 타이머 기준)
         self.frame_time = get_time()        # 마지막으로 프레임을 넘긴 시각
 
-        # 상태: IDLE, SLEEP, RUN (왼쪽/오른쪽은 하나의 RUN 상태)
+        # 상태: 각 상태는 BoyState를 상속한 클래스 (왼쪽/오른쪽은 하나의 RUN 상태)
         self.machine = Machine(
             model=self,
-            states=['IDLE', 'SLEEP', 'RUN'],
+            states=[Idle(), Sleep(), Run()],
             transitions=[
                 {'trigger': 'time_out', 'source': 'IDLE', 'dest': 'SLEEP'},
                 {'trigger': 'space_down', 'source': 'SLEEP', 'dest': 'IDLE'},
@@ -108,9 +108,8 @@ class Boy:
             ignore_invalid_triggers=True,   # 그 상태에 없는 전환은 오류 없이 무시
         )
 
-    # IDLE 상태로 들어올 때마다 자동 호출 -> 5초 타이머 다시 시작
-    def on_enter_IDLE(self):
-        self.idle_start_time = get_time()
+    def cur_state(self):
+        return self.machine.get_state(self.state)
 
     def handle_event(self, event):
         if event.type == SDL_KEYDOWN:
@@ -133,36 +132,10 @@ class Boy:
 
     def update(self):
         # 갱신 횟수가 아니라 시간 기준으로 프레임을 넘김 (delay 값과 상관없이 같은 속도)
-        if get_time() - self.frame_time >= FRAME_INTERVAL:
+        if get_time() - self.frame_time >= self.cur_state().frame_interval:
             self.frame = (self.frame + 1) % 8
             self.frame_time = get_time()
-
-        if self.state == 'IDLE':
-            if self.dir != 0:                       # SLEEP에서 깨어날 때 방향키를 누르고 있던 경우
-                self.run_start()
-            elif get_time() - self.idle_start_time >= SLEEP_WAIT_TIME:
-                self.time_out()
-        elif self.state == 'RUN':
-            self.face_dir = self.dir
-            self.x += self.dir * RUN_SPEED
-            self.x = clamp(50, self.x, 800 - 50)    # 화면 밖으로 나가지 않게 (이미지 폭의 절반만큼 여백)
+        self.cur_state().do(self)
 
     def draw(self):
-        if self.state == 'IDLE':
-            if self.face_dir == 1:
-                self.image.clip_draw(self.frame * 100, 300, 100, 100, self.x, self.y)
-            else:
-                self.image.clip_draw(self.frame * 100, 200, 100, 100, self.x, self.y)
-        elif self.state == 'RUN':
-            if self.face_dir == 1:
-                self.image.clip_draw(self.frame * 100, 100, 100, 100, self.x, self.y)
-            else:
-                self.image.clip_draw(self.frame * 100, 0, 100, 100, self.x, self.y)
-        elif self.state == 'SLEEP':
-            # 대기 프레임을 90도 눕혀서 그림
-            if self.face_dir == 1:
-                self.image.clip_composite_draw(self.frame * 100, 300, 100, 100,
-                                               3.141592 / 2, '', self.x - 25, self.y - 25, 100, 100)
-            else:
-                self.image.clip_composite_draw(self.frame * 100, 200, 100, 100,
-                                               -3.141592 / 2, '', self.x + 25, self.y - 25, 100, 100)
+        self.cur_state().draw(self)
