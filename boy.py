@@ -93,7 +93,13 @@ class AutoRun(BoyState):
 
     def do(self, boy):
         boy.x += boy.auto_dir * RUN_SPEED
-        boy.x = clamp(50, boy.x, 800 - 50)      # 화면 밖으로 나가지 않게
+        # 화면 좌우 끝에 닿으면 자동으로 방향 전환
+        if boy.x >= 800 - 50:
+            boy.x = 800 - 50
+            boy.auto_dir = -1
+        elif boy.x <= 50:
+            boy.x = 50
+            boy.auto_dir = 1
         boy.face_dir = boy.auto_dir
 
     def draw(self, boy):
