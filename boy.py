@@ -83,6 +83,21 @@ class Run(BoyState):
             boy.image.clip_draw(boy.frame * 100, 0, 100, 100, boy.x, boy.y)
 
 
+class AutoRun(BoyState):
+    """자동 무적 런: 키 조작 없이 좌우로 계속 달림."""
+    def __init__(self):
+        super().__init__('AUTO_RUN')
+
+    def on_enter_state(self, boy):
+        boy.auto_dir = boy.face_dir            # 바라보던 방향으로 출발
+
+    def draw(self, boy):
+        if boy.face_dir == 1:
+            boy.image.clip_draw(boy.frame * 100, 100, 100, 100, boy.x, boy.y)
+        else:
+            boy.image.clip_draw(boy.frame * 100, 0, 100, 100, boy.x, boy.y)
+
+
 class Boy:
     def __init__(self):
         self.x, self.y = 400, 90
