@@ -93,17 +93,21 @@ class AutoRun(BoyState):
     def __init__(self):
         super().__init__('AUTO_RUN')
 
+    def half_width(self):
+        return 100 * AUTO_RUN_SCALE // 2       # 확대된 이미지 폭의 절반
+
     def on_enter_state(self, boy):
         boy.auto_dir = boy.face_dir            # 바라보던 방향으로 출발
+        boy.x = clamp(self.half_width(), boy.x, 800 - self.half_width())
 
     def do(self, boy):
         boy.x += boy.auto_dir * AUTO_RUN_SPEED
         # 화면 좌우 끝에 닿으면 자동으로 방향 전환
-        if boy.x >= 800 - 50:
-            boy.x = 800 - 50
+        if boy.x >= 800 - self.half_width():
+            boy.x = 800 - self.half_width()
             boy.auto_dir = -1
-        elif boy.x <= 50:
-            boy.x = 50
+        elif boy.x <= self.half_width():
+            boy.x = self.half_width()
             boy.auto_dir = 1
         boy.face_dir = boy.auto_dir
 
