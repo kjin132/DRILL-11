@@ -1,10 +1,36 @@
 from pico2d import load_image, get_time, clamp
 from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT
-from transitions import Machine
+from transitions import Machine, State
 
 FRAME_INTERVAL = 0.05     # 프레임 한 장을 보여주는 시간(초). 클수록 다리가 천천히 움직임
 RUN_SPEED = 5             # RUN 이동 속도 (한 번 갱신할 때 움직이는 픽셀)
 SLEEP_WAIT_TIME = 5       # IDLE로 이 시간(초)이 지나면 SLEEP
+
+
+class BoyState(State):
+    """소년 상태의 공통 부모 클래스.
+    enter: 상태에 들어갈 때, exit: 나갈 때, do: 머무는 동안 매 프레임, draw: 그리기"""
+    frame_interval = FRAME_INTERVAL
+
+    def enter(self, event_data):
+        super().enter(event_data)
+        self.on_enter_state(event_data.model)
+
+    def exit(self, event_data):
+        super().exit(event_data)
+        self.on_exit_state(event_data.model)
+
+    def on_enter_state(self, boy):
+        pass
+
+    def on_exit_state(self, boy):
+        pass
+
+    def do(self, boy):
+        pass
+
+    def draw(self, boy):
+        pass
 
 
 class Boy:
