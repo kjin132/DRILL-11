@@ -3,6 +3,7 @@ from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT
 from transitions import Machine
 
 FRAME_INTERVAL = 0.05     # 프레임 한 장을 보여주는 시간(초). 클수록 다리가 천천히 움직임
+RUN_SPEED = 5             # RUN 이동 속도 (한 번 갱신할 때 움직이는 픽셀)
 
 
 class Boy:
@@ -66,7 +67,7 @@ class Boy:
                 self.time_out()
         elif self.state == 'RUN':
             self.face_dir = self.dir
-            self.x += self.dir * 5
+            self.x += self.dir * RUN_SPEED
             self.x = clamp(50, self.x, 800 - 50)    # 화면 밖으로 나가지 않게 (이미지 폭의 절반만큼 여백)
 
     def draw(self):
