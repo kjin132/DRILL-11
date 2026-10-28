@@ -1,5 +1,5 @@
 from pico2d import load_image, get_time, clamp
-from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDLK_a
 from transitions import Machine, State
 
 FRAME_INTERVAL = 0.05     # 프레임 한 장을 보여주는 시간(초). 클수록 다리가 천천히 움직임
@@ -103,7 +103,8 @@ class Boy:
         self.x, self.y = 400, 90
         self.frame = 0
         self.face_dir = 1        # 바라보는 방향: 1 오른쪽, -1 왼쪽
-        self.dir = 0             # 이동 방향: 1 오른쪽, -1 왼쪽, 0 정지
+        self.dir = 0             # 방향키 입력 상태: 1 오른쪽, -1 왼쪽, 0 없음
+        self.auto_dir = 1        # AutoRun 이동 방향
         self.image = load_image('animation_sheet.png')
         self.idle_start_time = get_time()   # IDLE에 들어간 시각 (5초 타이머 기준)
         self.frame_time = get_time()        # 마지막으로 프레임을 넘긴 시각
@@ -111,12 +112,13 @@ class Boy:
         # 상태: 각 상태는 BoyState를 상속한 클래스 (왼쪽/오른쪽은 하나의 RUN 상태)
         self.machine = Machine(
             model=self,
-            states=[Idle(), Sleep(), Run()],
+            states=[Idle(), Sleep(), Run(), AutoRun()],
             transitions=[
                 {'trigger': 'time_out', 'source': 'IDLE', 'dest': 'SLEEP'},
                 {'trigger': 'space_down', 'source': 'SLEEP', 'dest': 'IDLE'},
                 {'trigger': 'run_start', 'source': ['IDLE', 'SLEEP'], 'dest': 'RUN'},
                 {'trigger': 'run_stop', 'source': 'RUN', 'dest': 'IDLE'},
+                {'trigger': 'a_down', 'source': 'IDLE', 'dest': 'AUTO_RUN'},
             ],
             initial='IDLE',
             auto_transitions=False,
@@ -134,6 +136,8 @@ class Boy:
                 self.dir -= 1
             elif event.key == SDLK_SPACE:
                 self.space_down()
+            elif event.key == SDLK_a:
+                self.a_down()         # IDLE에서만 AUTO_RUN으로 바뀜
         elif event.type == SDL_KEYUP:
             if event.key == SDLK_RIGHT:
                 self.dir -= 1
