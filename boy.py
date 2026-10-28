@@ -91,6 +91,11 @@ class AutoRun(BoyState):
     def on_enter_state(self, boy):
         boy.auto_dir = boy.face_dir            # 바라보던 방향으로 출발
 
+    def do(self, boy):
+        boy.x += boy.auto_dir * RUN_SPEED
+        boy.x = clamp(50, boy.x, 800 - 50)      # 화면 밖으로 나가지 않게
+        boy.face_dir = boy.auto_dir
+
     def draw(self, boy):
         if boy.face_dir == 1:
             boy.image.clip_draw(boy.frame * 100, 100, 100, 100, boy.x, boy.y)
