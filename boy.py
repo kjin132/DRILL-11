@@ -8,6 +8,7 @@ SLEEP_WAIT_TIME = 5       # IDLE로 이 시간(초)이 지나면 SLEEP
 
 AUTO_RUN_SPEED = 15       # AutoRun 이동 속도 (RUN의 3배)
 AUTO_RUN_SCALE = 2        # AutoRun 크기 배율
+AUTO_RUN_TIME = 5         # AutoRun이 이 시간(초) 이상 지나면 IDLE
 
 
 class BoyState(State):
@@ -97,6 +98,7 @@ class AutoRun(BoyState):
         return 100 * AUTO_RUN_SCALE // 2       # 확대된 이미지 폭의 절반
 
     def on_enter_state(self, boy):
+        boy.auto_run_start_time = get_time()
         boy.auto_dir = boy.face_dir            # 바라보던 방향으로 출발
         boy.x = clamp(self.half_width(), boy.x, 800 - self.half_width())
 
@@ -129,6 +131,7 @@ class Boy:
         self.auto_dir = 1        # AutoRun 이동 방향
         self.image = load_image('animation_sheet.png')
         self.idle_start_time = get_time()   # IDLE에 들어간 시각 (5초 타이머 기준)
+        self.auto_run_start_time = 0        # AUTO_RUN에 들어간 시각
         self.frame_time = get_time()        # 마지막으로 프레임을 넘긴 시각
 
         # 상태: 각 상태는 BoyState를 상속한 클래스 (왼쪽/오른쪽은 하나의 RUN 상태)
