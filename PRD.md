@@ -50,3 +50,37 @@ AutoRun 중에는 더 빠르고 더 크게 보이며, 5초가 지나거나 방�
 | FR-7 | AUTO_RUN 중 방향키를 누르면 AutoRun이 취소되고, 눌린 방향으로 움직이는 RUN 상태가 된다. |
 | FR-8 | AutoRun은 반드시 별도의 상태 클래스(`AutoRun`)로 구현한다. |
 | FR-9 | 상태 다이어그램을 이미지 파일로 저장소에 포함한다. |
+
+## 6. 상태 설계
+
+각 상태는 transitions의 `State`를 상속한 `BoyState` 클래스를 부모로 하는 **상태 클래스**로 만든다.
+
+| 메서드 | 호출 시점 |
+|---|---|
+| `on_enter_state(boy)` | 상태에 들어갈 때 (Entry action) |
+| `on_exit_state(boy)` | 상태에서 나갈 때 (Exit action) |
+| `do(boy)` | 상태에 머무는 동안 매 프레임 (Do activity) |
+| `draw(boy)` | 그리기 |
+
+### 6.1 상태 목록
+
+| 상태 | 클래스 | 하는 일 |
+|---|---|---|
+| IDLE | `Idle` | 대기 애니메이션, 5초 타이머 |
+| SLEEP | `Sleep` | 누워서 자는 모습 |
+| RUN | `Run` | 방향키 방향으로 이동 |
+| AUTO_RUN | `AutoRun` | 자동 좌우 이동, 빠른 속도, 2배 크기, 5초 타이머 |
+
+### 6.2 상태 전환
+
+| 출발 | 이벤트 (trigger) | 도착 |
+|---|---|---|
+| IDLE | `time_out` (IDLE로 5초 경과) | SLEEP |
+| SLEEP | `space_down` (SPACE) | IDLE |
+| IDLE, SLEEP | `run_start` (←/→ 누름) | RUN |
+| RUN | `run_stop` (←/→ 모두 뗌) | IDLE |
+| IDLE | `a_down` (`a` 누름) | AUTO_RUN |
+| AUTO_RUN | `auto_run_time_out` (AUTO_RUN으로 5초 경과) | IDLE |
+| AUTO_RUN | `run_start` (←/→ 누름) | RUN |
+
+그 상태에 정의되지 않은 이벤트는 무시한다(`ignore_invalid_triggers=True`). 예: SLEEP에서 `a`, RUN에서 `a`.
