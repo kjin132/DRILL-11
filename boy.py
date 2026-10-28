@@ -1,0 +1,90 @@
+from pico2d import load_image, get_time, clamp
+from pico2d import SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT
+from transitions import Machine
+
+FRAME_INTERVAL = 0.05     # 프레임 한 장을 보여주는 시간(초). 클수록 다리가 천천히 움직임
+
+
+class Boy:
+    def __init__(self):
+        self.x, self.y = 400, 90
+        self.frame = 0
+        self.face_dir = 1        # 바라보는 방향: 1 오른쪽, -1 왼쪽
+        self.dir = 0             # 이동 방향: 1 오른쪽, -1 왼쪽, 0 정지
+        self.image = load_image('animation_sheet.png')
+        self.idle_start_time = get_time()   # IDLE에 들어간 시각 (5초 타이머 기준)
+        self.frame_time = get_time()        # 마지막으로 프레임을 넘긴 시각
+
+        # 상태: IDLE, SLEEP, RUN (왼쪽/오른쪽은 하나의 RUN 상태)
+        self.machine = Machine(
+            model=self,
+            states=['IDLE', 'SLEEP', 'RUN'],
+            transitions=[
+                {'trigger': 'time_out', 'source': 'IDLE', 'dest': 'SLEEP'},
+                {'trigger': 'space_down', 'source': 'SLEEP', 'dest': 'IDLE'},
+                {'trigger': 'run_start', 'source': ['IDLE', 'SLEEP'], 'dest': 'RUN'},
+                {'trigger': 'run_stop', 'source': 'RUN', 'dest': 'IDLE'},
+            ],
+            initial='IDLE',
+            auto_transitions=False,
+            ignore_invalid_triggers=True,   # 그 상태에 없는 전환은 오류 없이 무시
+        )
+
+    # IDLE 상태로 들어올 때마다 자동 호출 -> 5초 타이머 다시 시작
+    def on_enter_IDLE(self):
+        self.idle_start_time = get_time()
+
+    def handle_event(self, event):
+        if event.type == SDL_KEYDOWN:
+            if event.key == SDLK_RIGHT:
+                self.dir += 1
+            elif event.key == SDLK_LEFT:
+                self.dir -= 1
+            elif event.key == SDLK_SPACE:
+                self.space_down()
+        elif event.type == SDL_KEYUP:
+            if event.key == SDLK_RIGHT:
+                self.dir -= 1
+            elif event.key == SDLK_LEFT:
+                self.dir += 1
+
+        if self.dir != 0:
+            self.run_start()     # IDLE 또는 SLEEP에서 RUN으로 바뀜
+        else:
+            self.run_stop()      # RUN에서만 IDLE로 바뀜
+
+    def update(self):
+        # 갱신 횟수가 아니라 시간 기준으로 프레임을 넘김 (delay 값과 상관없이 같은 속도)
+        if get_time() - self.frame_time >= FRAME_INTERVAL:
+            self.frame = (self.frame + 1) % 8
+            self.frame_time = get_time()
+
+        if self.state == 'IDLE':
+            if self.dir != 0:                       # SLEEP에서 깨어날 때 방향키를 누르고 있던 경우
+                self.run_start()
+            elif get_time() - self.idle_start_time >= 5:
+                self.time_out()
+        elif self.state == 'RUN':
+            self.face_dir = self.dir
+            self.x += self.dir * 5
+            self.x = clamp(50, self.x, 800 - 50)    # 화면 밖으로 나가지 않게 (이미지 폭의 절반만큼 여백)
+
+    def draw(self):
+        if self.state == 'IDLE':
+            if self.face_dir == 1:
+                self.image.clip_draw(self.frame * 100, 300, 100, 100, self.x, self.y)
+            else:
+                self.image.clip_draw(self.frame * 100, 200, 100, 100, self.x, self.y)
+        elif self.state == 'RUN':
+            if self.face_dir == 1:
+                self.image.clip_draw(self.frame * 100, 100, 100, 100, self.x, self.y)
+            else:
+                self.image.clip_draw(self.frame * 100, 0, 100, 100, self.x, self.y)
+        elif self.state == 'SLEEP':
+            # 대기 프레임을 90도 눕혀서 그림
+            if self.face_dir == 1:
+                self.image.clip_composite_draw(self.frame * 100, 300, 100, 100,
+                                               3.141592 / 2, '', self.x - 25, self.y - 25, 100, 100)
+            else:
+                self.image.clip_composite_draw(self.frame * 100, 200, 100, 100,
+                                               -3.141592 / 2, '', self.x + 25, self.y - 25, 100, 100)
