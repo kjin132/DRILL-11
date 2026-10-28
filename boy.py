@@ -33,6 +33,26 @@ class BoyState(State):
         pass
 
 
+class Idle(BoyState):
+    def __init__(self):
+        super().__init__('IDLE')
+
+    def on_enter_state(self, boy):
+        boy.idle_start_time = get_time()    # IDLE에 들어올 때마다 5초 타이머 다시 시작
+
+    def do(self, boy):
+        if boy.dir != 0:                    # SLEEP에서 깨어날 때 방향키를 누르고 있던 경우
+            boy.run_start()
+        elif get_time() - boy.idle_start_time >= SLEEP_WAIT_TIME:
+            boy.time_out()
+
+    def draw(self, boy):
+        if boy.face_dir == 1:
+            boy.image.clip_draw(boy.frame * 100, 300, 100, 100, boy.x, boy.y)
+        else:
+            boy.image.clip_draw(boy.frame * 100, 200, 100, 100, boy.x, boy.y)
+
+
 class Boy:
     def __init__(self):
         self.x, self.y = 400, 90
