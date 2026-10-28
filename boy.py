@@ -67,6 +67,22 @@ class Sleep(BoyState):
                                           -3.141592 / 2, '', boy.x + 25, boy.y - 25, 100, 100)
 
 
+class Run(BoyState):
+    def __init__(self):
+        super().__init__('RUN')
+
+    def do(self, boy):
+        boy.face_dir = boy.dir
+        boy.x += boy.dir * RUN_SPEED
+        boy.x = clamp(50, boy.x, 800 - 50)      # 화면 밖으로 나가지 않게 (이미지 폭의 절반만큼 여백)
+
+    def draw(self, boy):
+        if boy.face_dir == 1:
+            boy.image.clip_draw(boy.frame * 100, 100, 100, 100, boy.x, boy.y)
+        else:
+            boy.image.clip_draw(boy.frame * 100, 0, 100, 100, boy.x, boy.y)
+
+
 class Boy:
     def __init__(self):
         self.x, self.y = 400, 90
