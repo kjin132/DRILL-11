@@ -84,3 +84,47 @@ AutoRun 중에는 더 빠르고 더 크게 보이며, 5초가 지나거나 방�
 | AUTO_RUN | `run_start` (←/→ 누름) | RUN |
 
 그 상태에 정의되지 않은 이벤트는 무시한다(`ignore_invalid_triggers=True`). 예: SLEEP에서 `a`, RUN에서 `a`.
+
+## 7. 수치
+
+| 항목 | 값 |
+|---|---|
+| RUN 이동 속도 | 갱신 1회당 5 px |
+| AUTO_RUN 이동 속도 | 갱신 1회당 15 px (RUN의 3배) |
+| 프레임 간격 | RUN·IDLE 0.05초, AUTO_RUN 0.025초 (다리도 2배 빠르게) |
+| AUTO_RUN 크기 | 2배 (100 × 100 → 200 × 200) |
+| AUTO_RUN 그리기 y | y + 50 (발 위치 유지) |
+| AUTO_RUN 이동 범위 | x 100 ~ 700 (확대된 폭 200의 절반만큼 여백) |
+| RUN 이동 범위 | x 50 ~ 750 |
+| SLEEP 대기 시간 | IDLE로 5초 |
+| AUTO_RUN 유지 시간 | 5초 |
+
+## 8. 개발 단계
+
+작은 단위로 구현하고 실행 확인 후 커밋한다.
+
+1. PRD.md 작성
+2. 이동 속도·대기 시간 상수 정리
+3. 상태 클래스 구조 도입 (BoyState, Idle, Sleep, Run) — 동작은 기존과 같게 유지
+4. AutoRun 상태 클래스 추가, IDLE에서 `a`로 진입
+5. AutoRun 자동 이동
+6. 화면 좌우 끝에서 자동 방향 전환
+7. AutoRun 속도 증가
+8. AutoRun 크기 확대
+9. AutoRun 5초 경과 시 IDLE 복귀
+10. AutoRun 중 방향키로 RUN 전환
+11. 상태 다이어그램 이미지 추가
+12. 검증 결과 정리
+
+## 9. 검증 계획
+
+| 확인 항목 | 기대 결과 |
+|---|---|
+| IDLE에서 `a` | AUTO_RUN, 키 없이 이동 시작 |
+| AUTO_RUN 이동 속도 | 갱신 1회당 15 px (RUN 5 px보다 빠름) |
+| AUTO_RUN 크기 | 200 × 200으로 그려지고 발 위치는 그대로 |
+| 오른쪽 끝 / 왼쪽 끝 | x 700 / 100에서 방향 전환, 화면 밖으로 안 나감 |
+| AUTO_RUN 5초 경과 | IDLE로 복귀, IDLE 5초 타이머 다시 시작 |
+| AUTO_RUN 중 ← 또는 → | RUN, 눌린 방향으로 이동 |
+| SLEEP에서 `a` | 무시 (SLEEP 유지) |
+| 기존 기능 | IDLE ↔ SLEEP ↔ RUN 전환이 그대로 동작 |
