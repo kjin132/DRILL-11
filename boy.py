@@ -87,6 +87,8 @@ class Run(BoyState):
 
 class AutoRun(BoyState):
     """자동 무적 런: 키 조작 없이 좌우로 계속 달림. 더 빠르다."""
+    frame_interval = FRAME_INTERVAL / 2     # 다리도 RUN보다 2배 빠르게
+
     def __init__(self):
         super().__init__('AUTO_RUN')
 
