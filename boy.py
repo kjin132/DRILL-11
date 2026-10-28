@@ -113,6 +113,9 @@ class AutoRun(BoyState):
             boy.auto_dir = 1
         boy.face_dir = boy.auto_dir
 
+        if get_time() - boy.auto_run_start_time >= AUTO_RUN_TIME:
+            boy.auto_run_time_out()
+
     def draw(self, boy):
         size = 100 * AUTO_RUN_SCALE
         y = boy.y + (size - 100) // 2          # 발 위치는 그대로 두고 위로 커지게
@@ -144,6 +147,7 @@ class Boy:
                 {'trigger': 'run_start', 'source': ['IDLE', 'SLEEP'], 'dest': 'RUN'},
                 {'trigger': 'run_stop', 'source': 'RUN', 'dest': 'IDLE'},
                 {'trigger': 'a_down', 'source': 'IDLE', 'dest': 'AUTO_RUN'},
+                {'trigger': 'auto_run_time_out', 'source': 'AUTO_RUN', 'dest': 'IDLE'},
             ],
             initial='IDLE',
             auto_transitions=False,
