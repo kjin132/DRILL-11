@@ -144,7 +144,7 @@ class Boy:
             transitions=[
                 {'trigger': 'time_out', 'source': 'IDLE', 'dest': 'SLEEP'},
                 {'trigger': 'space_down', 'source': 'SLEEP', 'dest': 'IDLE'},
-                {'trigger': 'run_start', 'source': ['IDLE', 'SLEEP'], 'dest': 'RUN'},
+                {'trigger': 'run_start', 'source': ['IDLE', 'SLEEP', 'AUTO_RUN'], 'dest': 'RUN'},
                 {'trigger': 'run_stop', 'source': 'RUN', 'dest': 'IDLE'},
                 {'trigger': 'a_down', 'source': 'IDLE', 'dest': 'AUTO_RUN'},
                 {'trigger': 'auto_run_time_out', 'source': 'AUTO_RUN', 'dest': 'IDLE'},
@@ -174,7 +174,7 @@ class Boy:
                 self.dir += 1
 
         if self.dir != 0:
-            self.run_start()     # IDLE 또는 SLEEP에서 RUN으로 바뀜
+            self.run_start()     # IDLE, SLEEP, AUTO_RUN에서 RUN으로 바뀜
         else:
             self.run_stop()      # RUN에서만 IDLE로 바뀜
 
