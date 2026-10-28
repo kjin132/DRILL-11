@@ -4,6 +4,7 @@ from transitions import Machine
 
 FRAME_INTERVAL = 0.05     # 프레임 한 장을 보여주는 시간(초). 클수록 다리가 천천히 움직임
 RUN_SPEED = 5             # RUN 이동 속도 (한 번 갱신할 때 움직이는 픽셀)
+SLEEP_WAIT_TIME = 5       # IDLE로 이 시간(초)이 지나면 SLEEP
 
 
 class Boy:
@@ -63,7 +64,7 @@ class Boy:
         if self.state == 'IDLE':
             if self.dir != 0:                       # SLEEP에서 깨어날 때 방향키를 누르고 있던 경우
                 self.run_start()
-            elif get_time() - self.idle_start_time >= 5:
+            elif get_time() - self.idle_start_time >= SLEEP_WAIT_TIME:
                 self.time_out()
         elif self.state == 'RUN':
             self.face_dir = self.dir
