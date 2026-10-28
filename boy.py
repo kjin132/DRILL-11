@@ -6,6 +6,8 @@ FRAME_INTERVAL = 0.05     # 프레임 한 장을 보여주는 시간(초). 클�
 RUN_SPEED = 5             # RUN 이동 속도 (한 번 갱신할 때 움직이는 픽셀)
 SLEEP_WAIT_TIME = 5       # IDLE로 이 시간(초)이 지나면 SLEEP
 
+AUTO_RUN_SPEED = 15       # AutoRun 이동 속도 (RUN의 3배)
+
 
 class BoyState(State):
     """소년 상태의 공통 부모 클래스.
@@ -84,7 +86,7 @@ class Run(BoyState):
 
 
 class AutoRun(BoyState):
-    """자동 무적 런: 키 조작 없이 좌우로 계속 달림."""
+    """자동 무적 런: 키 조작 없이 좌우로 계속 달림. 더 빠르다."""
     def __init__(self):
         super().__init__('AUTO_RUN')
 
@@ -92,7 +94,7 @@ class AutoRun(BoyState):
         boy.auto_dir = boy.face_dir            # 바라보던 방향으로 출발
 
     def do(self, boy):
-        boy.x += boy.auto_dir * RUN_SPEED
+        boy.x += boy.auto_dir * AUTO_RUN_SPEED
         # 화면 좌우 끝에 닿으면 자동으로 방향 전환
         if boy.x >= 800 - 50:
             boy.x = 800 - 50
